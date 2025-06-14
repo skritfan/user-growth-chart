@@ -130,14 +130,28 @@
                 const lines = csvText.trim().split('\n');
                 const headers = lines[0].split(',');
                 
-                rawData = lines.slice(1).map(line => {
+                // Spracovanie dát a automatický výpočet prírastkov
+                const sortedData = lines.slice(1).map(line => {
                     const values = line.split(',');
                     return {
                         id: parseInt(values[0]),
-                        date: values[1],
-                        count: values[2] ? parseInt(values[2]) : null
+                        date: values[1]
                     };
-                }).filter(item => item.count !== null);
+                }).sort((a, b) => a.id - b.id); // Zoradenie podľa ID
+                
+                // Výpočet prírastkov
+                rawData = [];
+                for (let i = 1; i < sortedData.length; i++) {
+                    const current = sortedData[i];
+                    const previous = sortedData[i - 1];
+                    const count = current.id - previous.id;
+                    
+                    rawData.push({
+                        id: current.id,
+                        date: current.date,
+                        count: count
+                    });
+                }
 
                 document.getElementById('loading').style.display = 'none';
                 updateStats();
